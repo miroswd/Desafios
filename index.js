@@ -74,10 +74,7 @@ function reqCount(req,res,next){
   return next()
 }
 
-
-
 server.use(reqCount) // Middleware Global
-
 
 /*****  Cria o projeto  *****/
 server.post('/create/project', projectCreated, (req,res) => {
