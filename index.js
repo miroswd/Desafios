@@ -9,6 +9,11 @@
       put    -> Alterar apenas o título do projeto
       delete -> Deleta o projeto
       post   -> Adiciona tarefas
+
+  -- 
+    criar um middleware para verificar se existe o projeto baseado no id passado
+
+    criar um middleware global para contar o número de requisições
 */
 
 const express = require('express');
@@ -33,9 +38,49 @@ server.use(express.json());
 
 
 const projects = [];
+let num = 0
+
+/***** Middlewares *****/
+
+// Verifica a existência do projeto
+
+function projectExists(req,res,next){
+  // Verificar se o id existe cadastrado no array
+
+  const {id} = req.params
+  const project = projects.find(proj => proj.id == id)
+
+  if (!project) {
+    return res.status(404).json({error:'The project not exists'})
+  } return next()
+}
+
+// Impede a criação de projetos com o mesmo id
+function projectCreated(req,res,next){
+  
+  const {id} = req.body
+  const project = projects.find(proj => proj.id == id)
+
+  if(project){
+    return res.status(400).json({error:'The project already exists'})
+  } return next()
+
+}
+
+// Contar requisições
+function reqCount(req,res,next){
+  num++ 
+  console.log(num)
+  return next()
+}
+
+
+
+server.use(reqCount) // Middleware Global
+
 
 /*****  Cria o projeto  *****/
-server.post('/create/project',(req,res) => {
+server.post('/create/project', projectCreated, (req,res) => {
 
   // Sem validação de dados
   const {id,title,tasks} = req.body
@@ -50,7 +95,7 @@ server.get('/projects', (req,res) => {
 })
 
 /***** Altera apenas o título *****/
-server.put('/title/:id',(req,res) => {
+server.put('/title/:id', projectExists,(req,res) => {
   const {id} = req.params
   const {newTitle} = req.body
 
@@ -61,7 +106,7 @@ server.put('/title/:id',(req,res) => {
 })
 
 /***** Deletar o projeto *****/
-server.delete('/delete/:id', (req,res) => {
+server.delete('/delete/:id', projectExists, (req,res) => {
   const {id} = req.params
   const project = projects.findIndex(proj => proj.id == id)
   // Deletando baseado no index
@@ -71,7 +116,7 @@ server.delete('/delete/:id', (req,res) => {
 })
 
 /***** Adicionando tarefas no projeto *****/
-server.post('/:id/tasks', (req,res) => {
+server.post('/:id/tasks', projectExists, (req,res) => {
   const {id} = req.params
   const {task} = req.body
   const projectIndex = projects.findIndex(proj => proj.id == id)
