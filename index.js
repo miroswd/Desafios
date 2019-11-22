@@ -20,9 +20,10 @@ const express = require('express');
 const server = express();
 
 server.use(express.json());
-/* 
 
-    ESTRUTURA FRONTEND
+
+/* 
+    Deve retornar da seguinte maneira:
 
 {
   "id": 1,
@@ -121,9 +122,11 @@ server.post('/:id/tasks', projectExists, (req,res) => {
   return res.json(projects)
 })
 
+
 /* Rota de teste inicial
 server.get('/teste', (req,res) => {
   return res.send('Bom dia')
 })*/
+
 
 server.listen(3000);
